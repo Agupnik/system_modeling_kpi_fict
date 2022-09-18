@@ -2,48 +2,32 @@ from gen1 import Generator1
 from gen2 import Generator2
 from gen3 import Generator3
 
+num_of_values = 10000
+bins = 20
+num_of_test = 3
+list_of_lambda = [0.5, 0.3, 15]
 
-print('\t###__Lambda = 0.5__###')
-generator_1 = Generator1(0.5, 10000)
-generator_1.analyze(20)
-print()
+for lambda_val in list_of_lambda:
+    print(f'\t###__Lambda = {lambda_val}__###')
+    generator_1 = Generator1(lambda_val, num_of_values)
+    generator_1.analyze(bins)
+    print()
 
-print('\t###__Lambda = 0.3__###')
-generator_1 = Generator1(0.3, 10000)
-generator_1.analyze(20)
-print()
+list_of_alpha = [2, 10, 5]
+list_of_sigma = [1, 5, 7]
 
-print('\t###__Lambda = 15__###')
-generator_1 = Generator1(15, 10000)
-generator_1.analyze(20)
-print()
+for i in range(0, num_of_test):
+    print(f'\t###__Alpha = {list_of_alpha[i]}; Sigma = {list_of_sigma[i]}__###')
+    generator_2 = Generator2(list_of_alpha[i], list_of_sigma[i], num_of_values)
+    generator_2.analyze(bins)
+    print()
 
-print('\t###__Alpha = 2; Sigma = 1__###')
-generator_2 = Generator2(2, 1, 10000)
-generator_2.analyze(20)
-print()
+list_of_a = [pow(5, 13), pow(5, 6), pow(5, 12)]
+list_of_c = [pow(2, 31), pow(2, 15), pow(2, 10)]
 
-print('\t###__Alpha = 10; Sigma = 5__###')
-generator_2 = Generator2(10, 5, 10000)
-generator_2.analyze(20)
-print()
 
-print('\t###__Alpha = 5; Sigma = 7__###')
-generator_2 = Generator2(5, 7, 10000)
-generator_2.analyze(20)
-print()
-
-print('\t###__A = 5^13; C = 2^31__###')
-generator_3 = Generator3(10000, pow(5, 13), pow(2, 31))
-generator_3.analyze(20)
-print()
-
-print('\t###__A = 5^6; C = 2^15__###')
-generator_3 = Generator3(10000, pow(5, 13), pow(2, 31))
-generator_3.analyze(20)
-print()
-
-print('\t###__A = 5^12; C = 2^10__###')
-generator_3 = Generator3(10000, pow(5, 12), pow(2, 10))
-generator_3.analyze(20)
-print()
+for i in range(0, num_of_test):
+    print(f'\t###__A = {list_of_a[i]}; C = {list_of_c[i]}__###')
+    generator_3 = Generator3(num_of_values, list_of_a[i], list_of_c[i])
+    generator_3.analyze(bins)
+    print()

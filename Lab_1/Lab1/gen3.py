@@ -1,26 +1,13 @@
 import random
 import numpy as np
-import util
+from gen import Generator
 
 
-def calculate(array, interval_list, i):
-    return (interval_list[i][1] - interval_list[i][0]) / (max(array) - min(array))
-
-
-def get_expected_values(array, entries, num_of_intervals):
-    expected_list = list()
-    interval_list = util.pull_intervals_from_list(entries, num_of_intervals)
-
-    for i in range(num_of_intervals):
-        expected_list.append(calculate(array, interval_list, i))
-    return expected_list
-
-
-class Generator3:
+class Generator3(Generator):
     def __init__(self, num_of_values, a, c):
         self.a = a
         self.c = c
-        self.num_of_values = num_of_values
+        super().__init__(num_of_values, self.calculate_uniform)
 
     def create_array(self):
         z = self.a * random.random() % self.c
@@ -32,19 +19,5 @@ class Generator3:
 
         return x_array
 
-    def analyze(self, num_of_intervals):
-        util.print_name(3)
-
-        array = self.create_array()
-        average, dispersion = util.get_average_and_dispersion(array)
-
-        entries = util.get_intervals(array, num_of_intervals)
-        util.plot_histogram(entries, num_of_intervals)
-
-        expected_list = get_expected_values(array, entries, num_of_intervals)
-        observed_list = [i[1] for i in entries]
-
-        observed_chi_squared, expected_chi_squared = util.chi_2_tool(expected_list, observed_list, num_of_intervals)
-
-        util.print_extra_info(average, dispersion, observed_chi_squared, expected_chi_squared,
-                              observed_chi_squared < expected_chi_squared)
+    def calculate_uniform(self, interval_list, i):
+        return (interval_list[i][1] - interval_list[i][0]) / (max(self.array) - min(self.array))
