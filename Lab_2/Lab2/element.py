@@ -5,17 +5,18 @@ class Element:
     nextId = 0
 
     def __init__(self, delay=None, distribution=None):
-        self.t_next = 0.0  # момент часу наступної події
+        self.t_next = [0]  # момент часу наступної події
         self.delay_mean = delay  # середнє значення часової затримки
         self.delay_dev = None  # середнє квадратичне відхилення часової затримки
         self.quantity = 0
         self.t_curr = self.t_next  # поточний момент часу
-        self.state = 0
+        self.state = [0]
         self.next_element = None  # вказує на наступний (в маршруті слідування вимоги) елемент моделі
         self.id_el = Element.nextId
         Element.nextId += 1
         self.name = 'Element' + str(self.id_el)
         self.distribution = distribution
+        self.probability = [1]
 
     def get_delay(self):
         if 'exp' == self.distribution:

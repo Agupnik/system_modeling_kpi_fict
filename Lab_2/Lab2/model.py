@@ -1,3 +1,5 @@
+import numpy as np
+
 from process import Process
 
 
@@ -7,19 +9,18 @@ class Model:
         self.event = 0
         self.t_next = 0.0
         self.t_curr = self.t_next
-        self.emul_time = 0
 
     # здійснення імітації на інтервалі часу time
     def simulate(self, time):
-        self.emul_time = time
         while self.t_curr < time:
             # встановити t_next на max value of float
             self.t_next = float('inf')
 
             for e in self.list:
                 # знаходимо найменший з моментів часу
-                if e.t_next < self.t_next:
-                    self.t_next = e.t_next
+                t_next_val = np.min(e.t_next)
+                if t_next_val < self.t_next:
+                    self.t_next = t_next_val
                     self.event = e.id_el
 
             for e in self.list:
@@ -36,7 +37,7 @@ class Model:
                 self.list[self.event].out_act()
 
             for e in self.list:
-                if e.t_next == self.t_curr:
+                if self.t_curr in e.t_next:
                     e.out_act()
 
             self.print_info()
@@ -65,7 +66,7 @@ class Model:
                 failure_probability = e.failure / (e.quantity + e.failure) if (e.quantity + e.failure) != 0 else 0
 
                 # розрахунок середнього завантаження пристрою
-                mean_load = e.quantity / self.emul_time
+                mean_load = e.mean_load / self.t_curr
 
                 global_mean_queue_length_accumulator += mean_queue_length
                 global_failure_probability_accumulator += failure_probability

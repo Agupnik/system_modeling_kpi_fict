@@ -1,25 +1,28 @@
-import random as rnd
+import numpy as np
 import element as e
 
 
 class Process(e.Element):
-    def __init__(self, delay):
+    def __init__(self, delay, channels=1):
         super().__init__(delay)
         self.queue = 0
         self.max_observed_queue = 0
         self.max_queue = float('inf')
         self.mean_queue = 0.0
         self.failure = 0
-        self.next_processes = []
         self.mean_load = 0
-        self.delta_tr = 0
-        self.max_delta_tr = 0
-        self.is_next_dispose = False
+        self.channel = channels
+        self.t_next = [np.inf]*self.channel
+        self.state = [0]*self.channel
+        self.probability = [1]
 
     def in_act(self):
-        if super().get_state() == 0:
-            super().set_state(1)
-            super().set_t_next(super().get_t_curr() + super().get_delay())
+        free_route = self.get_free_channels()
+        if len(free_route) > 0:
+            for i in free_route:
+                self.state[i] = 1
+                self.t_next[i] = self.t_curr + super().get_delay()
+                break
         else:
             if self.queue < self.max_queue:
                 self.queue += 1
@@ -27,22 +30,33 @@ class Process(e.Element):
                 self.failure += 1
 
     def out_act(self):
-        super().out_act()
-        self.set_t_next(float('inf'))
-        self.set_state(0)
+        current_channel = self.get_current_channel()
+        for i in current_channel:
+            super().out_act()
+            self.t_next[i] = np.inf
+            self.state[i] = 0
+            if self.queue > 0:
+                self.queue -= 1
+                self.state[i] = 1
+                self.t_next[i] = self.t_curr + self.get_delay()
+            if self.next_element is not None:
+                next_el = np.random.choice(a=self.next_element, p=self.probability)
+                next_el.in_act()
 
-        if self.queue > 0:
-            self.queue -= 1
-            self.set_state(1)
-            self.t_next = self.t_curr + self.get_delay()
+    def get_free_channels(self):
+        free_channels = []
+        for i in range(self.channel):
+            if self.state[i] == 0:
+                free_channels.append(i)
 
-        if len(self.next_processes) > 0:
-            if not self.is_next_dispose:
-                index = rnd.randint(0, len(self.next_processes) - 1)
-            else:
-                index = rnd.randint(0, len(self.next_processes))
-            if index != len(self.next_processes):
-                self.next_processes[index].in_act()
+        return free_channels
+
+    def get_current_channel(self):
+        current_channels = []
+        for i in range(self.channel):
+            if self.t_next[i] == self.t_curr:
+                current_channels.append(i)
+        return current_channels
 
     def print_info(self):
         super().print_info()
@@ -54,7 +68,7 @@ class Process(e.Element):
         if self.queue > self.max_observed_queue:
             self.max_observed_queue = self.queue
 
-        self.delta_tr += delta * self.state
+        for i in range(self.channel):
+            self.mean_load += self.state[i] * delta
 
-        if delta*self.state > self.max_delta_tr:
-            self.max_delta_tr = delta * float(self.state)
+        self.mean_load = self.mean_load / self.channel

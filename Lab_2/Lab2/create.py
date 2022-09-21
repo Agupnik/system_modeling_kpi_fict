@@ -9,5 +9,5 @@ class Create(e.Element):
         # виконуємо збільшення лічильника кількості
         super().out_act()
         # встановлюємо коли пристрій буде вільним
-        self.t_next = self.t_curr + self.get_delay()
-        self.next_element.in_act()
+        self.t_next[0] = self.t_curr + self.get_delay()
+        self.next_element[0].in_act()
